@@ -2,10 +2,13 @@
 <html>
   <head>
     <title>Acceleration</title>
- 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+
     <script type="text/javascript" charset="utf-8" src="phoneGap.js"></script>
-	<script type="text/javascript" charset="utf-8" src="app.js"></script>
-	<script>
+	
+	<script type="text/javascript" charset="utf-8">
+	/*
 	//wait for PhoneGap to load
 		document.addEventListener("deviceready", loaded, false);
 		 
@@ -45,10 +48,98 @@
 		function onError() {
 			alert('onError!');
 		}
+	*/
 	
+	var pictureSource; // picture source
+	var destinationType; //sets the format of returned value
+	
+	//wait for phonegap to connect to device-width
+	
+	document.addEventListener("deviceready", onDeviceReady, false);
+	
+	//phoneGap is ready to be used
+	
+	function onDeviceReady(){
+		pictureSource=navigator.camera.PictureSourceType;
+		destinationType=navigator.camera.DestinationType;
+	}
+	
+	//called when a photo is successfully retrieved
+	
+	function onPhotoDataSuccess(imageData){
+		//Get image Handle
+		
+		var smallImage = document.getElementById('smallImage');
+		
+		//unhide image elements
+		
+		smallImage.style.display = 'block';
+		
+		//show the captred photo
+		//inline css are used to  resize the image
+		smallImage.src = "data:image/jpeg;base64" + imageData;
+	}
+	
+	//called when a photo is successfully retrieved
+	
+	function onPhotoFileSuccess(imageData){
+		//get the image handle
+		
+		console.log(JSON.stringify(imageData));
+		
+		//get the image handle
+		
+		var smallImage = document.getElementById('smallImage');
+		// Unhide image elements
+      //
+      smallImage.style.display = 'block';
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      smallImage.src = imageData;
+	}
+	
+	//called when a photo is successfully retrieved
+	function onPhotoURISuccess(imageURI){
+		var largeImage = document.getElementById('largeImage');
+		
+		//unhide image elements
+		largeImage.style.display = 'block';
+		
+		//show the captured photo
+		//inline css used to resize the image
+		largeImage.src = imageURI;
+	}
+	
+	function capturePhotoWithData() {
+		//take picture using device camera and retrieve image as  base64 encoded string
+		navigator.camera.getPicture(onPhotoDataSuccess, onFail, {quality:50});
+	}
+	function capturePhotoWithFile() {
+        navigator.camera.getPicture(onPhotoFileSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
+    }
+    
+    // A button will call this function
+    //
+    function getPhoto(source) {
+      // Retrieve image file location from specified source
+      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
+        destinationType: destinationType.FILE_URI,
+        sourceType: source });
+    }
+    // Called if something bad happens.
+    // 
+    function onFail(message) {
+      alert('Failed because: ' + message);
+    }
 	</script>
   </head>
   <body>
-     <div id="accelerometer">Waiting for accelerometer...</div>
+     <button onclick="capturePhotoWithData();">Capture Photo With Image Data</button> <br>
+    <button onclick="capturePhotoWithFile();">Capture Photo With Image File URI</button> <br>
+    <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button><br>
+    <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button><br>
+    <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
+    <img style="display:none;" id="largeImage" src="" />
   </body>
 </html>
